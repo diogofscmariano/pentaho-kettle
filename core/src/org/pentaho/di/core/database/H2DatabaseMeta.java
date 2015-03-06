@@ -234,7 +234,7 @@ public class H2DatabaseMeta extends BaseDatabaseMeta implements DatabaseInterfac
           retval += "TEXT";
         } else {
           retval += "VARCHAR";
-          if ( length > 0 ) {
+            if ( length > 0 ) {
             retval += "(" + length;
           } else {
             // http://www.h2database.com/html/datatypes.html#varchar_type
