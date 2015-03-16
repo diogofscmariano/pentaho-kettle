@@ -4351,6 +4351,7 @@ public class ValueMetaBase implements ValueMetaInterface {
       switch ( type ) {
         case java.sql.Types.CHAR:
         case java.sql.Types.VARCHAR:
+        case java.sql.Types.NVARCHAR:
         case java.sql.Types.LONGVARCHAR: // Character Large Object
           valtype = ValueMetaInterface.TYPE_STRING;
           if ( !ignoreLength ) {
@@ -4359,6 +4360,7 @@ public class ValueMetaBase implements ValueMetaInterface {
           break;
 
         case java.sql.Types.CLOB:
+        case java.sql.Types.NCLOB:
           valtype = ValueMetaInterface.TYPE_STRING;
           length = DatabaseMeta.CLOB_LENGTH;
           isClob = true;
@@ -4476,6 +4478,13 @@ public class ValueMetaBase implements ValueMetaInterface {
               precision = -1;
             }
           }
+          
+          if ( databaseMeta.getDatabaseInterface().getClass().getName().equals( "org.pentaho.di.core.database.SAPHanaDatabaseMeta" ) ) {
+            if ( precision == 0 && length == 16 ) {
+              valtype = ValueMetaInterface.TYPE_NUMBER;
+            }
+          }
+          
           break;
 
         case java.sql.Types.TIMESTAMP:
@@ -4533,6 +4542,8 @@ public class ValueMetaBase implements ValueMetaInterface {
             // CONCAT see PDI-4812)
           } else if ( databaseMeta.getDatabaseInterface() instanceof SQLiteDatabaseMeta ) {
             valtype = ValueMetaInterface.TYPE_STRING;
+          } else if ( databaseMeta.getDatabaseInterface().getClass().getName().equals( "org.pentaho.di.core.database.SAPHanaDatabaseMeta" ) ) {
+            length = Math.min( Integer.MAX_VALUE, rm.getPrecision( index ) );
           } else {
             length = -1;
           }
