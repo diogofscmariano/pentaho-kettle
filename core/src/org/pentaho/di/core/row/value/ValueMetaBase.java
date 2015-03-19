@@ -4479,12 +4479,6 @@ public class ValueMetaBase implements ValueMetaInterface {
             }
           }
           
-          if ( databaseMeta.getDatabaseInterface().getClass().getName().equals( "org.pentaho.di.core.database.SAPHanaDatabaseMeta" ) ) {
-            if ( precision == 0 && length == 16 ) {
-              valtype = ValueMetaInterface.TYPE_NUMBER;
-            }
-          }
-          
           break;
 
         case java.sql.Types.TIMESTAMP:
@@ -4542,8 +4536,6 @@ public class ValueMetaBase implements ValueMetaInterface {
             // CONCAT see PDI-4812)
           } else if ( databaseMeta.getDatabaseInterface() instanceof SQLiteDatabaseMeta ) {
             valtype = ValueMetaInterface.TYPE_STRING;
-          } else if ( databaseMeta.getDatabaseInterface().getClass().getName().equals( "org.pentaho.di.core.database.SAPHanaDatabaseMeta" ) ) {
-            length = Math.min( Integer.MAX_VALUE, rm.getPrecision( index ) );
           } else {
             length = -1;
           }
@@ -4579,8 +4571,13 @@ public class ValueMetaBase implements ValueMetaInterface {
           throw new SQLException( e );
         }
       }
-
-      return v;
+      
+      ValueMetaInterface newValueMetaInterface = databaseMeta.getDatabaseInterface().customizeValueFromSQLType( v, rm, index );
+      if( newValueMetaInterface != null ) {
+        return newValueMetaInterface;
+      } else {
+        return v;
+      }
     } catch ( Exception e ) {
       throw new KettleDatabaseException( "Error determining value metadata from SQL resultset metadata", e );
     }
